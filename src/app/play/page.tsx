@@ -1805,19 +1805,13 @@ function PlayPageClient() {
     clearRefreshTimer(); // 清除旧的定时器
     isInitialLoadRef.current = true; // 重置为首次加载
 
-    // 动态设置 referrer policy：只在小雅源时不发送 Referer
+    // 动态设置 referrer policy：不发送 Referer
     const existingMeta = document.querySelector('meta[name="referrer"]');
-    if (detailData?.source === 'xiaoya') {
-      if (!existingMeta) {
-        const meta = document.createElement('meta');
-        meta.name = 'referrer';
-        meta.content = 'no-referrer';
-        document.head.appendChild(meta);
-      }
-    } else {
-      if (existingMeta) {
-        existingMeta.remove();
-      }
+    if (!existingMeta) {
+      const meta = document.createElement('meta');
+      meta.name = 'referrer';
+      meta.content = 'no-referrer';
+      document.head.appendChild(meta);
     }
 
     if (
@@ -4847,7 +4841,7 @@ function PlayPageClient() {
         moreVideoAttr: {
           playsInline: true,
           'webkit-playsinline': 'true',
-          ...(detail?.source === 'xiaoya' ? { referrerpolicy: 'no-referrer' } : {}),
+          referrerpolicy: 'no-referrer',
         } as any,
         // HLS 支持配置
         customType: {
