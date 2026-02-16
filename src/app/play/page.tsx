@@ -55,6 +55,7 @@ import { usePlaySync } from '@/hooks/usePlaySync';
 import AIChatPanel from '@/components/AIChatPanel';
 import CorrectDialog from '@/components/CorrectDialog';
 import DanmakuFilterSettings from '@/components/DanmakuFilterSettings';
+import DetailPanel from '@/components/DetailPanel';
 import DoubanComments from '@/components/DoubanComments';
 import DownloadEpisodeSelector from '@/components/DownloadEpisodeSelector';
 import EpisodeSelector from '@/components/EpisodeSelector';
@@ -127,6 +128,9 @@ function PlayPageClient() {
 
   // 纠错弹窗状态
   const [showCorrectDialog, setShowCorrectDialog] = useState(false);
+
+  // 详情面板状态
+  const [showDetailPanel, setShowDetailPanel] = useState(false);
 
   // 检查AI功能是否启用
   useEffect(() => {
@@ -7804,6 +7808,19 @@ function PlayPageClient() {
                         <Sparkles className='h-6 w-6 text-gray-700 dark:text-gray-300' />
                       </button>
                     )}
+                    {/* 详情按钮 */}
+                    {detail && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDetailPanel(true);
+                        }}
+                        className='flex-shrink-0 hover:opacity-80 transition-opacity px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300'
+                        title='详情'
+                      >
+                        详
+                      </button>
+                    )}
                     {/* 纠错按钮 - 仅小雅源显示 */}
                     {detail && detail.source === 'xiaoya' && (
                       <button
@@ -8115,6 +8132,47 @@ function PlayPageClient() {
             // 纠错成功后的回调
             handleCorrectSuccess();
           }}
+        />
+      )}
+
+      {/* 详情面板 */}
+      {detail && (
+        <DetailPanel
+          isOpen={showDetailPanel}
+          onClose={() => setShowDetailPanel(false)}
+          title={detail.title}
+          poster={detail.poster}
+          doubanId={
+            // 特殊源使用 tmdb，其他使用 cms（通过 doubanId）
+            detail.source === 'openlist' ||
+            detail.source?.startsWith('emby') ||
+            detail.source === 'xiaoya'
+              ? undefined
+              : detail.douban_id
+          }
+          tmdbId={
+            // 特殊源使用 tmdb
+            detail.source === 'openlist' ||
+            detail.source?.startsWith('emby') ||
+            detail.source === 'xiaoya'
+              ? detail.tmdb_id
+              : undefined
+          }
+          type={detail.type_name === '电影' ? 'movie' : 'tv'}
+          cmsData={
+            // 非特殊源使用 cms 数据
+            detail.source !== 'openlist' &&
+            !detail.source?.startsWith('emby') &&
+            detail.source !== 'xiaoya'
+              ? {
+                  desc: detail.desc,
+                  episodes: detail.episodes,
+                  episodes_titles: detail.episodes_titles,
+                }
+              : undefined
+          }
+          sourceId={detail.id}
+          source={detail.source}
         />
       )}
     </PageLayout>
